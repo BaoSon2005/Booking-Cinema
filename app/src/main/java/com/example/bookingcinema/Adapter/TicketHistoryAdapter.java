@@ -18,12 +18,17 @@ import java.util.Locale;
 
 public class TicketHistoryAdapter extends RecyclerView.Adapter<TicketHistoryAdapter.TicketViewHolder> {
 
-    private Context context;
+    private final Context context;
     private List<TicketHistory> ticketList;
 
     public TicketHistoryAdapter(Context context, List<TicketHistory> ticketList) {
         this.context = context;
         this.ticketList = ticketList;
+    }
+
+    public void updateList(List<TicketHistory> tickets) {
+        ticketList = tickets;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -40,18 +45,22 @@ public class TicketHistoryAdapter extends RecyclerView.Adapter<TicketHistoryAdap
         holder.tvCinema.setText("Rạp: " + ticket.getCinema());
         holder.tvShowtime.setText("Suất chiếu: " + ticket.getShowtime());
         holder.tvSeats.setText("Ghế: " + ticket.getSeats());
-
-        NumberFormat format = NumberFormat.getInstance(new Locale("vi", "VN"));
-        holder.tvTotalPrice.setText("Tổng tiền: " + format.format(ticket.getTotalPrice()) + "₫");
+        holder.tvTicketCode.setText(ticket.getTicketCode().isEmpty() ? "Mã vé: Đang đồng bộ" : "Mã vé: " + ticket.getTicketCode());
+        holder.tvStatus.setText(ticket.getStatus());
+        holder.tvTotalPrice.setText("Tổng tiền: " + formatVnd(ticket.getTotalPrice()));
     }
 
     @Override
     public int getItemCount() {
-        return ticketList.size();
+        return ticketList == null ? 0 : ticketList.size();
+    }
+
+    private String formatVnd(int amount) {
+        return NumberFormat.getInstance(new Locale("vi", "VN")).format(amount) + "đ";
     }
 
     public static class TicketViewHolder extends RecyclerView.ViewHolder {
-        TextView tvMovieTitle, tvCinema, tvShowtime, tvSeats, tvTotalPrice;
+        TextView tvMovieTitle, tvCinema, tvShowtime, tvSeats, tvTotalPrice, tvTicketCode, tvStatus;
 
         public TicketViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -60,6 +69,8 @@ public class TicketHistoryAdapter extends RecyclerView.Adapter<TicketHistoryAdap
             tvShowtime = itemView.findViewById(R.id.tvShowtime);
             tvSeats = itemView.findViewById(R.id.tvSeats);
             tvTotalPrice = itemView.findViewById(R.id.tvTotalPrice);
+            tvTicketCode = itemView.findViewById(R.id.tvTicketCode);
+            tvStatus = itemView.findViewById(R.id.tvStatus);
         }
     }
 }

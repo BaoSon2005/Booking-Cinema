@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home"
@@ -14,16 +13,15 @@
     <item
         android:id="@+id/nav_chat"
         android:icon="@drawable/ic_chat"
-        android:title="Chat" />
+        android:title="Trợ lý" />
 
     <item
         android:id="@+id/nav_notifications"
         android:icon="@drawable/ic_notifi"
-        android:title="Thông báo" />
+        android:title="Tin mới" />
 
     <item
         android:id="@+id/nav_account"
         android:icon="@drawable/ic_account"
         android:title="Tài khoản" />
-
 </menu>

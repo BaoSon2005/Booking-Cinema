@@ -1,87 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="#FFFFFF">
+    android:background="@color/cinema_bg"
+    android:fillViewport="true">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Poster phim -->
-        <ImageView
-            android:id="@+id/imgPoster"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:scaleType="centerCrop"
-            android:layout_marginBottom="16dp"
-            android:contentDescription="Poster phim" />
+            android:layout_height="42dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <!-- Tiêu đề phim -->
+            <TextView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="‹"
+                android:textColor="@color/cinema_text_muted"
+                android:textSize="24sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="CINE-LUXE"
+                android:textColor="@color/cinema_accent"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_icon_circle_luxe"
+                android:gravity="center"
+                android:text="▶"
+                android:textColor="@color/cinema_accent"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="260dp">
+
+            <ImageView
+                android:id="@+id/imgPoster"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Poster phim"
+                android:scaleType="centerCrop"
+                android:src="@drawable/logo" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#99000000" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_margin="18dp"
+                android:maxLines="2"
+                android:text="Tên phim"
+                android:textColor="@color/cinema_text"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
         <TextView
-            android:id="@+id/tvTitle"
-            android:text="Tên phim"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
+            android:id="@+id/tvMeta"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Hành động • 120 phút • T13"
+            android:textColor="@color/cinema_accent"
+            android:textSize="14sp" />
 
-        <!-- Mô tả phim -->
         <TextView
             android:id="@+id/tvDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:lineSpacingExtra="4dp"
             android:text="Mô tả phim"
-            android:textSize="16sp"
-            android:textColor="#555555"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:textColor="@color/cinema_text_muted"
+            android:textSize="14sp" />
 
-        <!-- Tiêu đề chọn rạp -->
-        <TextView
-            android:text="🏢 Chọn rạp chiếu phim:"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="8dp"
+        <Button
+            android:id="@+id/btnTrailer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_button_outline"
+            android:text="Xem trailer"
+            android:textAllCaps="false"
+            android:textColor="@color/cinema_text"
+            android:textStyle="bold" />
 
-        <!-- Spinner chọn rạp -->
-        <Spinner
-            android:id="@+id/spinnerCinema"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="@color/cinema_panel"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/cinema_stroke"
+            app:strokeWidth="1dp">
 
-        <!-- Tiêu đề chọn suất chiếu -->
-        <TextView
-            android:text="🕐 Chọn suất chiếu:"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-        <!-- Spinner chọn thời gian chiếu -->
-        <Spinner
-            android:id="@+id/spinnerShowtime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Chọn rạp và suất chiếu"
+                    android:textColor="@color/cinema_text"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-        <!-- Nút tiếp tục -->
+                <Spinner
+                    android:id="@+id/spinnerCinema"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="14dp"
+                    android:background="@drawable/bg_input_luxe"
+                    android:popupBackground="@color/cinema_panel" />
+
+                <Spinner
+                    android:id="@+id/spinnerShowtime"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_input_luxe"
+                    android:popupBackground="@color/cinema_panel" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="12dp"
+                    android:indeterminateTint="@color/cinema_accent" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <Button
             android:id="@+id/btnContinue"
-            android:text="Tiếp tục đặt vé"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#FF4081"
-            android:textColor="#FFFFFF"
-            android:layout_marginTop="16dp" />
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_button_neon"
+            android:text="TIẾP TỤC CHỌN GHẾ"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>

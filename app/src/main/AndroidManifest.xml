@@ -2,9 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
         android:allowBackup="true"
@@ -15,83 +15,32 @@
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.BookingCinema"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <activity
 
-            android:name=".UserScreen.UserListActivity"
-            android:exported="false" />
+        <activity android:name=".UserScreen.ChatActivity" android:exported="false" />
+        <activity android:name=".UserScreen.EditProfileActivity" android:exported="false" />
+        <activity android:name=".UserScreen.PrivacyPolicyActivity" android:exported="false" />
+        <activity android:name=".UserScreen.TermsActivity" android:exported="false" />
+        <activity android:name=".UserScreen.XacNhanThanhToanActivity" android:exported="false" />
+        <activity android:name=".UserScreen.TicketSuccessActivity" android:exported="false" />
+        <activity android:name=".UserScreen.PaymentActivity" android:exported="false" />
+        <activity android:name=".UserScreen.HistoryActivity" android:exported="false" />
+        <activity android:name=".UserScreen.NotificationActivity" android:exported="false" />
+        <activity android:name=".UserScreen.SettingsActivity" android:exported="false" />
+        <activity android:name=".UserScreen.ChooseSeatActivity" android:exported="false" />
+        <activity android:name=".UserScreen.MovieDetailActivity" android:exported="false" />
+        <activity android:name=".UserScreen.ForgotPasswordActivity" android:exported="false" />
+        <activity android:name=".UserScreen.MainActivity" android:exported="false" />
+        <activity android:name=".UserScreen.RegistersActivity" android:exported="false" />
+        <activity android:name=".UserScreen.LoginActivity" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false" />
+
         <activity
-            android:name=".AdminScreen.AddMovieActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminScreen.AdminMovieActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminScreen.AddShowtimeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminScreen.EditShowtimeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminScreen.AdminShowtimeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminScreen.AdminDashboardActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminScreen.AdminMainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.ChatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.EditProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.PrivacyPolicyActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.TermsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.TicketSuccessActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.PaymentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.HistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.NotificationActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.ChooseSeatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.MovieDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.RegistersActivity"
-            android:exported="false" />
-        <activity
-            android:name=".UserScreen.LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".UserScreen.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

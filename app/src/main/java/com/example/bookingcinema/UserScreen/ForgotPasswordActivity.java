@@ -1,7 +1,7 @@
 package com.example.bookingcinema.UserScreen;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -9,11 +9,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bookingcinema.R;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
-    EditText edtEmailForgot;
-    Button btnRecover;
+    private EditText edtEmailForgot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,23 +21,21 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         setContentView(R.layout.activity_forgot_password);
 
         edtEmailForgot = findViewById(R.id.edtEmailForgot);
-        btnRecover = findViewById(R.id.btnRecover);
+        Button btnRecover = findViewById(R.id.btnRecover);
+        btnRecover.setOnClickListener(v -> sendResetEmail());
+    }
 
-        btnRecover.setOnClickListener(v -> {
-            String email = edtEmailForgot.getText().toString().trim();
-            if (email.isEmpty()) {
-                Toast.makeText(this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            SharedPreferences prefs = getSharedPreferences("users", MODE_PRIVATE);
-            String storedPassword = prefs.getString(email, null);
-
-            if (storedPassword != null) {
-                Toast.makeText(this, "Mật khẩu của bạn là: " + storedPassword, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, "Email chưa được đăng ký", Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void sendResetEmail() {
+        String email = edtEmailForgot.getText().toString().trim();
+        if (TextUtils.isEmpty(email)) {
+            Toast.makeText(this, "Vui lòng nhập email", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                .addOnSuccessListener(unused -> {
+                    Toast.makeText(this, "Đã gửi liên kết khôi phục mật khẩu", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Không gửi được email: " + (e.getMessage() == null ? "Lỗi không xác định" : e.getMessage()), Toast.LENGTH_SHORT).show());
     }
 }

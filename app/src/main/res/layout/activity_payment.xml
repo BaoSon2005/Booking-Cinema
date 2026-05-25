@@ -1,145 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/cinema_bg"
+    android:orientation="vertical">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="20dp">
+        android:layout_height="48dp"
+        android:background="@drawable/bg_top_bar_luxe"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp">
 
-        <!-- Tiêu đề -->
         <TextView
-            android:text="🔖 Xác nhận thanh toán"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="#D32F2F"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="‹"
+            android:textColor="@color/cinema_text_muted"
+            android:textSize="24sp" />
 
-        <!-- Ghế đã chọn -->
         <TextView
-            android:id="@+id/tvSelectedSeats"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Thanh toán"
+            android:textColor="@color/cinema_accent"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_icon_circle_luxe"
+            android:gravity="center"
+            android:text="●"
+            android:textColor="@color/cinema_accent"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:overScrollMode="never">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ghế đã chọn: "
-            android:textSize="16sp"
-            android:textColor="#212121"
-            android:layout_marginBottom="8dp" />
+            android:orientation="vertical"
+            android:padding="14dp">
 
-        <!-- Tổng tiền -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/cinema_panel"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/cinema_stroke"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvSummary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="3"
+                        android:text="Phim • Rạp • Suất chiếu"
+                        android:textColor="@color/cinema_text"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvSelectedSeats"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:ellipsize="end"
+                        android:maxLines="2"
+                        android:text="Ghế đã chọn:"
+                        android:textColor="@color/cinema_text_muted"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/txtTicketPrice"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Tiền vé: 0đ"
+                        android:textColor="@color/cinema_accent"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Đặt trước bắp nước"
+                android:textColor="@color/cinema_text"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnPickupTime"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_button_outline"
+                android:text="Chọn giờ nhận combo"
+                android:textAllCaps="false"
+                android:textColor="@color/cinema_text"
+                android:textSize="12sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerFood"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_marginTop="10dp"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never" />
+
+            <TextView
+                android:id="@+id/txtFoodPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="Combo: 0đ"
+                android:textColor="@color/cinema_accent"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@color/cinema_panel"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/cinema_stroke"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Voucher và thông tin nhận vé"
+                        android:textColor="@color/cinema_text"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtDiscountCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_input_luxe"
+                        android:hint="Nhập mã voucher"
+                        android:inputType="textCapCharacters"
+                        android:paddingHorizontal="14dp"
+                        android:singleLine="true"
+                        android:textColor="@color/cinema_text"
+                        android:textColorHint="@color/cinema_text_muted"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/btnApplyCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_button_outline"
+                        android:text="Xem voucher khả dụng"
+                        android:textAllCaps="false"
+                        android:textColor="@color/cinema_text"
+                        android:textSize="12sp" />
+
+                    <ListView
+                        android:id="@+id/lvDiscountCodes"
+                        android:layout_width="match_parent"
+                        android:layout_height="118dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_panel_glass"
+                        android:divider="@color/cinema_stroke"
+                        android:dividerHeight="1dp"
+                        android:visibility="gone" />
+
+                    <EditText
+                        android:id="@+id/edtName"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_input_luxe"
+                        android:hint="Họ tên người nhận vé"
+                        android:inputType="textPersonName"
+                        android:paddingHorizontal="14dp"
+                        android:singleLine="true"
+                        android:textColor="@color/cinema_text"
+                        android:textColorHint="@color/cinema_text_muted"
+                        android:textSize="13sp" />
+
+                    <EditText
+                        android:id="@+id/edtPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_input_luxe"
+                        android:hint="Số điện thoại"
+                        android:inputType="phone"
+                        android:paddingHorizontal="14dp"
+                        android:singleLine="true"
+                        android:textColor="@color/cinema_text"
+                        android:textColorHint="@color/cinema_text_muted"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Phương thức thanh toán"
+                android:textColor="@color/cinema_text"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ListView
+                android:id="@+id/lvPaymentMethods"
+                android:layout_width="match_parent"
+                android:layout_height="146dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_panel_luxe"
+                android:choiceMode="singleChoice"
+                android:divider="@color/cinema_stroke"
+                android:dividerHeight="1dp" />
+
+            <ImageView
+                android:id="@+id/ivQRCode"
+                android:layout_width="178dp"
+                android:layout_height="178dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_qr_frame"
+                android:contentDescription="Mã QR thanh toán"
+                android:padding="8dp"
+                android:visibility="gone" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="18dp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="78dp"
+        android:background="@drawable/bg_sticky_checkout"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp">
+
         <TextView
             android:id="@+id/txtTotalPrice"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Tổng tiền: 0₫"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#E64A19"
-            android:layout_marginBottom="16dp" />
+            android:layout_weight="1"
+            android:text="Tổng thanh toán: 0đ"
+            android:textColor="@color/cinema_accent"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
-        <!-- Nhập mã giảm giá -->
-        <EditText
-            android:id="@+id/edtDiscountCode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="🎁 Nhập mã giảm giá"
-            android:inputType="text"
-            android:padding="12dp"
-            android:background="@drawable/bg_edittext"
-            android:textColor="#000000"
-            android:layout_marginBottom="8dp" />
-
-        <!-- Nút áp dụng -->
-        <Button
-            android:id="@+id/btnApplyCode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Áp dụng mã"
-            android:textAllCaps="false"
-            android:layout_gravity="end"
-            android:backgroundTint="#FF9800"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="16dp" />
-
-        <!-- Danh sách mã giảm giá -->
-        <ListView
-            android:id="@+id/lvDiscountCodes"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:divider="@android:color/darker_gray"
-            android:dividerHeight="1dp"
-            android:visibility="gone"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Họ tên -->
-        <EditText
-            android:id="@+id/edtName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="👤 Gmail"
-            android:inputType="textPersonName"
-            android:textColor="#000000"
-            android:padding="12dp"
-            android:background="@drawable/bg_edittext"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Số điện thoại -->
-        <EditText
-            android:id="@+id/edtPhone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="📞 Số điện thoại"
-            android:inputType="phone"
-            android:padding="12dp"
-            android:textColor="#000000"
-            android:background="@drawable/bg_edittext"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Thanh toán -->
-        <TextView
-            android:text="💳 Phương thức thanh toán"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#212121"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp" />
-
-        <ListView
-            android:id="@+id/lvPaymentMethods"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:divider="@color/cardview_dark_background"
-            android:dividerHeight="1dp"
-            android:choiceMode="singleChoice"
-            android:background="#F5F5F5"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Mã QR -->
-        <ImageView
-            android:id="@+id/ivQRCode"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_gravity="center"
-            android:contentDescription="Mã QR thanh toán"
-            android:visibility="gone"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Nút Thanh toán -->
         <Button
             android:id="@+id/btnPay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="✅ Thanh toán ngay"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#4CAF50"
-            android:padding="14dp" />
+            android:layout_width="166dp"
+            android:layout_height="50dp"
+            android:background="@drawable/bg_button_neon"
+            android:text="XÁC NHẬN"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:textStyle="bold" />
     </LinearLayout>
-</ScrollView>
+</LinearLayout>

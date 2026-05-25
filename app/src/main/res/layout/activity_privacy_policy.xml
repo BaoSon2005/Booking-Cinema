@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/cinema_bg"
     android:padding="20dp">
 
     <LinearLayout
@@ -14,17 +15,28 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Chính sách quyền riêng tư"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#000000"
-            android:paddingBottom="12dp" />
+            android:textColor="@color/cinema_text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvContent"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#333333"
-            android:textSize="15sp"
-            android:lineSpacingExtra="6dp" />
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/cinema_panel"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/cinema_stroke"
+            app:strokeWidth="1dp">
+
+            <TextView
+                android:id="@+id/tvContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="6dp"
+                android:padding="18dp"
+                android:textColor="@color/cinema_text_muted"
+                android:textSize="15sp" />
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView>

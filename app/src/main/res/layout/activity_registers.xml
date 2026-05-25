@@ -1,88 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/hinh">
+    android:background="@color/cinema_bg"
+    android:fillViewport="true">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:padding="32dp"
-        android:gravity="center_horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-        <ImageView
-            android:id="@+id/imgLogo"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/logo"
-            android:layout_marginBottom="16dp" />
-
-        <EditText
-            android:id="@+id/edtName"
-            android:layout_width="match_parent"
-            android:textColor="@color/cardview_dark_background"
-
-            android:layout_height="wrap_content"
-            android:hint="Name"
-            android:drawableLeft="@android:drawable/ic_menu_edit"
-            android:padding="10dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/edtEmail"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:textColor="@color/cardview_dark_background"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:text="Tạo thẻ thành viên"
+            android:textColor="@color/cinema_text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-            android:drawableLeft="@android:drawable/ic_dialog_email"
-            android:padding="10dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/edtPassword"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:textColor="@color/cardview_dark_background"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:text="Tích điểm, nhận voucher và lưu vé điện tử"
+            android:textColor="@color/cinema_text_muted"
+            android:textSize="14sp" />
 
-            android:drawableLeft="@android:drawable/ic_lock_lock"
-            android:padding="10dp"
-            android:background="@android:drawable/editbox_background_normal"
-            android:layout_marginBottom="8dp" />
-
-        <EditText
-            android:id="@+id/edtConfirmPassword"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Confirm Password"
-            android:inputType="textPassword"
-            android:drawableLeft="@android:drawable/ic_lock_lock"
-            android:padding="10dp"
-            android:textColor="@color/cardview_dark_background"
+            android:layout_marginTop="26dp"
+            app:cardBackgroundColor="@color/cinema_panel"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/cinema_stroke"
+            app:strokeWidth="1dp">
 
-            android:background="@android:drawable/editbox_background_normal"
-            android:layout_marginBottom="16dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
 
-        <Button
-            android:id="@+id/btnRegister"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Register"
-            android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="24dp" />
+                <EditText
+                    android:id="@+id/edtName"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/bg_input_luxe"
+                    android:hint="Họ và tên"
+                    android:inputType="textPersonName"
+                    android:paddingHorizontal="14dp"
+                    android:textColor="@color/cinema_text"
+                    android:textColorHint="@color/cinema_text_muted" />
+
+                <EditText
+                    android:id="@+id/edtEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_input_luxe"
+                    android:hint="Email"
+                    android:inputType="textEmailAddress"
+                    android:paddingHorizontal="14dp"
+                    android:textColor="@color/cinema_text"
+                    android:textColorHint="@color/cinema_text_muted" />
+
+                <EditText
+                    android:id="@+id/edtPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_input_luxe"
+                    android:hint="Mật khẩu"
+                    android:inputType="textPassword"
+                    android:paddingHorizontal="14dp"
+                    android:textColor="@color/cinema_text"
+                    android:textColorHint="@color/cinema_text_muted" />
+
+                <EditText
+                    android:id="@+id/edtConfirmPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_input_luxe"
+                    android:hint="Nhập lại mật khẩu"
+                    android:inputType="textPassword"
+                    android:paddingHorizontal="14dp"
+                    android:textColor="@color/cinema_text"
+                    android:textColorHint="@color/cinema_text_muted" />
+
+                <Button
+                    android:id="@+id/btnRegister"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="18dp"
+                    android:background="@drawable/bg_button_neon"
+                    android:text="ĐĂNG KÝ"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tvBackToLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Already have an account? Login"
-            android:textColor="#4285F4" />
+            android:layout_marginTop="20dp"
+            android:text="Đã có tài khoản? Quay lại đăng nhập"
+            android:textColor="@color/cinema_accent" />
     </LinearLayout>
 </ScrollView>
