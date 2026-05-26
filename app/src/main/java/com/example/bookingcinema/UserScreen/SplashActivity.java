@@ -34,25 +34,29 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void openNextScreen() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
-            openAndFinish(LoginActivity.class);
-            return;
-        }
+        try {
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                openAndFinish(LoginActivity.class);
+                return;
+            }
 
-        FirebaseFirestore.getInstance()
-                .collection("Users")
-                .document(currentUser.getUid())
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    String role = snapshot.getString("role");
-                    if (role == null || role.trim().isEmpty()) {
-                        readFallbackRole(currentUser.getUid());
-                    } else {
-                        routeByRole(role);
-                    }
-                })
-                .addOnFailureListener(e -> readFallbackRole(currentUser.getUid()));
+            FirebaseFirestore.getInstance()
+                    .collection("Users")
+                    .document(currentUser.getUid())
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        String role = snapshot.getString("role");
+                        if (role == null || role.trim().isEmpty()) {
+                            readFallbackRole(currentUser.getUid());
+                        } else {
+                            routeByRole(role);
+                        }
+                    })
+                    .addOnFailureListener(e -> readFallbackRole(currentUser.getUid()));
+        } catch (Exception ignored) {
+            openAndFinish(LoginActivity.class);
+        }
     }
 
     private void readFallbackRole(String uid) {

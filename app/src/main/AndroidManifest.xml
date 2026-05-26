@@ -18,6 +18,8 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
+        <activity android:name=".AdminScreen.FoodStatusActivity" android:exported="false" />
+        <activity android:name=".AdminScreen.AdminMainActivity" android:exported="false" />
         <activity android:name=".UserScreen.ChatActivity" android:exported="false" />
         <activity android:name=".UserScreen.EditProfileActivity" android:exported="false" />
         <activity android:name=".UserScreen.PrivacyPolicyActivity" android:exported="false" />

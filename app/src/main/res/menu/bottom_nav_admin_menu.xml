@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/admin_nav_dashboard"
+        android:icon="@drawable/ic_home"
+        android:title="Tổng quan" />
+
+    <item
+        android:id="@+id/admin_nav_scan"
+        android:icon="@drawable/ic_check"
+        android:title="Soát vé" />
+
+    <item
+        android:id="@+id/admin_nav_orders"
+        android:icon="@drawable/ic_payment"
+        android:title="Đơn hàng" />
+
+    <item
+        android:id="@+id/admin_nav_showtime"
+        android:icon="@drawable/ic_event"
+        android:title="Lịch chiếu" />
+</menu>
