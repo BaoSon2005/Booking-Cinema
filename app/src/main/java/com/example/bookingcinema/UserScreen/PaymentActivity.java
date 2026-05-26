@@ -59,6 +59,8 @@ public class PaymentActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private FoodAdapter foodAdapter;
+    private boolean destroyed = false;
+    private boolean paymentCompleted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +79,12 @@ public class PaymentActivity extends AppCompatActivity {
         loadFoodsFromFirestore();
         loadVouchersFromFirestore();
         updateTotals();
+    }
+
+    @Override
+    protected void onDestroy() {
+        destroyed = true; // FIX: Ngăn callback Firebase cập nhật UI sau khi PaymentActivity đóng.
+        super.onDestroy();
     }
 
     private void bindViews() {
@@ -101,6 +109,9 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void readIntent() {
         Intent intent = getIntent();
+        if (intent == null) {
+            intent = new Intent(); // FIX: Chống NPE khi Activity bị khởi tạo thiếu Intent.
+        }
         movie = (Movie) intent.getSerializableExtra("movie");
         movieTitle = firstNonEmpty(intent.getStringExtra("movieTitle"), movie == null ? "" : movie.getTitle(), "Phim CINE-LUXE");
         cinema = firstNonEmpty(intent.getStringExtra("cinema"), "CINE-LUXE Landmark 81");
@@ -160,8 +171,10 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void loadFoodsFromFirestore() {
-        db.collection("foods").get()
+        try {
+            db.collection("foods").get()
                 .addOnSuccessListener(snapshot -> {
+                    if (!isActivityAlive()) return;
                     foods.clear();
                     for (DocumentSnapshot doc : snapshot.getDocuments()) {
                         FoodItem food = doc.toObject(FoodItem.class);
@@ -176,6 +189,7 @@ public class PaymentActivity extends AppCompatActivity {
                     updateTotals();
                 })
                 .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
                     foods.clear();
                     foods.addAll(fallbackFoods());
                     foodAdapter.notifyDataSetChanged();
@@ -183,11 +197,22 @@ public class PaymentActivity extends AppCompatActivity {
                     updateTotals();
                     toast("Không tải được bắp nước, đang dùng combo mẫu");
                 });
+        } catch (Exception e) {
+            if (!isActivityAlive()) return;
+            foods.clear();
+            foods.addAll(fallbackFoods());
+            foodAdapter.notifyDataSetChanged();
+            calculateFoodTotal();
+            updateTotals();
+            toast("Không tải được bắp nước, đang dùng combo mẫu");
+        }
     }
 
     private void loadVouchersFromFirestore() {
-        db.collection("vouchers").get()
+        try {
+            db.collection("vouchers").get()
                 .addOnSuccessListener(snapshot -> {
+                    if (!isActivityAlive()) return;
                     vouchers.clear();
                     for (DocumentSnapshot doc : snapshot.getDocuments()) {
                         String code = firstNonEmpty(doc.getString("code"), doc.getId()).toUpperCase(Locale.ROOT);
@@ -201,11 +226,19 @@ public class PaymentActivity extends AppCompatActivity {
                     refreshVoucherList();
                 })
                 .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
                     vouchers.clear();
                     vouchers.addAll(fallbackVouchers());
                     refreshVoucherList();
                     toast("Không tải được voucher, đang dùng ưu đãi mẫu");
                 });
+        } catch (Exception e) {
+            if (!isActivityAlive()) return;
+            vouchers.clear();
+            vouchers.addAll(fallbackVouchers());
+            refreshVoucherList();
+            toast("Không tải được voucher, đang dùng ưu đãi mẫu");
+        }
     }
 
     private void refreshVoucherList() {
@@ -284,6 +317,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void confirmPayment() {
+        if (!isActivityAlive() || paymentCompleted) return; // FIX: Chống double click gây tạo nhiều hóa đơn.
         String name = edtName.getText().toString().trim();
         String phone = edtPhone.getText().toString().trim();
         int checkedPayment = lvPaymentMethods.getCheckedItemPosition();
@@ -337,15 +371,20 @@ public class PaymentActivity extends AppCompatActivity {
 
         db.collection("HoaDon").document(ticketId).set(invoice)
                 .addOnSuccessListener(unused -> {
+                    paymentCompleted = true;
                     markSeatsAsBooked();
                     rewardPoints(uid, finalPrice);
                     mirrorTicketHistory(ticketId, invoice);
+                    sendAdminTicketNotification(ticketId, invoice);
+                    if (!isActivityAlive()) return; // FIX: Backend vẫn đồng bộ, nhưng không mở màn hình nếu Activity đã đóng.
                     Intent intent = new Intent(PaymentActivity.this, XacNhanThanhToanActivity.class);
                     intent.putExtra("id_hoa_don", ticketId);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // FIX: Không để Payment bị mở chồng khi quay lại từ vé.
                     startActivity(intent);
                     finish();
                 })
                 .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
                     btnPay.setEnabled(true);
                     btnPay.setText("XÁC NHẬN");
                     toast("Không lưu được hóa đơn: " + safeMessage(e));
@@ -354,6 +393,45 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void mirrorTicketHistory(String ticketId, Map<String, Object> invoice) {
         db.collection("tickets").document(ticketId).set(invoice, SetOptions.merge());
+        db.collection("Tickets").document(ticketId).set(invoice, SetOptions.merge());
+    }
+
+    private void sendAdminTicketNotification(String ticketId, Map<String, Object> invoice) {
+        try {
+            String customerName = firstNonEmpty(asText(invoice.get("customerName")), "Khách CINE-LUXE");
+            String title = "Có đơn đặt vé mới!";
+            String message = customerName
+                    + " vừa đặt "
+                    + Math.max(1, selectedSeats.size())
+                    + " vé phim "
+                    + firstNonEmpty(asText(invoice.get("movieTitle")), movieTitle, "Phim CINE-LUXE")
+                    + ". Ghế: "
+                    + firstNonEmpty(asText(invoice.get("seats")), "đang cập nhật")
+                    + ".";
+
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("title", title);
+            notification.put("message", message);
+            notification.put("timestamp", FieldValue.serverTimestamp());
+            notification.put("createdAtMillis", System.currentTimeMillis());
+            notification.put("isRead", false);
+            notification.put("type", "new_ticket");
+            notification.put("ticketId", ticketId);
+            notification.put("customerName", customerName);
+            notification.put("movieTitle", firstNonEmpty(asText(invoice.get("movieTitle")), movieTitle));
+            notification.put("seats", firstNonEmpty(asText(invoice.get("seats")), ""));
+            notification.put("totalPrice", invoice.get("totalPrice"));
+
+            db.collection("AdminNotifications")
+                    .document(ticketId)
+                    .set(notification, SetOptions.merge())
+                    .addOnFailureListener(e -> {
+                        if (!isActivityAlive()) return;
+                        toast("Đã lưu vé nhưng chưa gửi được thông báo cho quản trị: " + safeMessage(e));
+                    });
+        } catch (Exception e) {
+            toast("Không thể tạo thông báo quản trị: " + safeMessage(e));
+        }
     }
 
     private void markSeatsAsBooked() {
@@ -433,12 +511,21 @@ public class PaymentActivity extends AppCompatActivity {
         return "";
     }
 
+    private String asText(Object value) {
+        return value == null ? "" : String.valueOf(value);
+    }
+
     private String safeMessage(Exception e) {
         return e.getMessage() == null ? "Lỗi không xác định" : e.getMessage();
     }
 
     private void toast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        if (!isActivityAlive()) return;
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isActivityAlive() {
+        return !destroyed && !isFinishing() && !isDestroyed();
     }
 
     private static class Voucher {

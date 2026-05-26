@@ -24,16 +24,24 @@ public class XacNhanThanhToanActivity extends AppCompatActivity {
     private TextView tvInvoiceId, tvMovieTitle, tvCinema, tvShowtime, tvSeats, tvTotal;
     private ImageView imgTicketQr;
     private String invoiceId;
+    private boolean destroyed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xac_nhan_thanh_toan);
 
-        invoiceId = getIntent().getStringExtra("id_hoa_don");
+        Intent sourceIntent = getIntent();
+        invoiceId = sourceIntent == null ? "" : sourceIntent.getStringExtra("id_hoa_don"); // FIX: Chống NPE khi thiếu Intent.
         bindViews();
         setupBackHome();
         loadInvoice();
+    }
+
+    @Override
+    protected void onDestroy() {
+        destroyed = true; // FIX: Không cập nhật vé điện tử sau khi Activity đã đóng.
+        super.onDestroy();
     }
 
     private void bindViews() {
@@ -64,14 +72,24 @@ public class XacNhanThanhToanActivity extends AppCompatActivity {
         }
 
         FirebaseFirestore.getInstance().collection("HoaDon").document(invoiceId).get()
-                .addOnSuccessListener(this::renderFromDocument)
+                .addOnSuccessListener(doc -> {
+                    if (!isActivityAlive()) return;
+                    if (doc == null || !doc.exists()) {
+                        toast("Không tìm thấy hóa đơn, đang hiển thị vé tạm");
+                        renderInvoice(invoiceId, "Phim CINE-LUXE", "CINE-LUXE", "Đang cập nhật", "Đang cập nhật", 0, "CINE-LUXE|" + invoiceId);
+                        return;
+                    }
+                    renderFromDocument(doc);
+                })
                 .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
                     toast("Không tải được hóa đơn");
                     renderInvoice(invoiceId, "Phim CINE-LUXE", "CINE-LUXE", "Đang cập nhật", "Đang cập nhật", 0, "CINE-LUXE|" + invoiceId);
                 });
     }
 
     private void renderFromDocument(DocumentSnapshot doc) {
+        if (doc == null || !doc.exists()) return; // FIX: Chặn đọc field trên document rỗng.
         String movieTitle = firstNonEmpty(doc.getString("movieTitle"), doc.getString("tenPhim"), "Phim CINE-LUXE");
         String cinema = firstNonEmpty(doc.getString("cinema"), doc.getString("rap"), "CINE-LUXE");
         String showtime = firstNonEmpty(doc.getString("showtime"), doc.getString("suatChieu"), "Đang cập nhật");
@@ -82,6 +100,7 @@ public class XacNhanThanhToanActivity extends AppCompatActivity {
     }
 
     private void renderInvoice(String id, String movieTitle, String cinema, String showtime, String seats, int total, String payload) {
+        if (!isActivityAlive()) return;
         tvInvoiceId.setText("Mã vé: " + id);
         tvMovieTitle.setText(movieTitle);
         tvCinema.setText("Rạp: " + cinema);
@@ -114,6 +133,11 @@ public class XacNhanThanhToanActivity extends AppCompatActivity {
     }
 
     private void toast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        if (!isActivityAlive()) return;
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isActivityAlive() {
+        return !destroyed && !isFinishing() && !isDestroyed();
     }
 }

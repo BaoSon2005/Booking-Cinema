@@ -27,6 +27,7 @@ public class FoodStatusActivity extends AppCompatActivity {
     private FoodStatusAdapter adapter;
     private ProgressBar progressFoodStatus;
     private TextView tvEmptyFoodStatus;
+    private boolean destroyed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +49,10 @@ public class FoodStatusActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        destroyed = true; // FIX: Không cập nhật UI sau khi Activity quản lý F&B đóng.
         if (foodRegistration != null) {
             foodRegistration.remove();
+            foodRegistration = null;
         }
         super.onDestroy();
     }
@@ -59,6 +62,7 @@ public class FoodStatusActivity extends AppCompatActivity {
             setLoading(true);
             foodRegistration = db.collection("foods")
                     .addSnapshotListener((snapshot, error) -> {
+                        if (!isActivityAlive()) return; // FIX: Listener realtime có thể trả về sau onDestroy().
                         setLoading(false);
                         List<FoodStatusItem> items = new ArrayList<>();
                         if (error != null) {
@@ -82,6 +86,7 @@ public class FoodStatusActivity extends AppCompatActivity {
     }
 
     private void updateAvailability(FoodStatusItem item, boolean isAvailable, int position) {
+        if (!isActivityAlive()) return;
         if (item == null || item.getId().isEmpty()) {
             toast("Không tìm thấy món cần cập nhật");
             return;
@@ -89,15 +94,22 @@ public class FoodStatusActivity extends AppCompatActivity {
         db.collection("foods")
                 .document(item.getId())
                 .update("isAvailable", isAvailable)
-                .addOnSuccessListener(unused -> toast(isAvailable ? "Đã mở bán " + item.getName() : "Đã tạm tắt " + item.getName()))
+                .addOnSuccessListener(unused -> {
+                    if (!isActivityAlive()) return;
+                    toast(isAvailable ? "Đã mở bán " + item.getName() : "Đã tạm tắt " + item.getName());
+                })
                 .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
                     item.setAvailable(!isAvailable);
-                    adapter.notifyItemChanged(position);
+                    if (position >= 0 && position < adapter.getItemCount()) {
+                        adapter.notifyItemChanged(position); // FIX: Tránh notify sai vị trí khi danh sách realtime thay đổi.
+                    }
                     toast("Không thể cập nhật trạng thái: " + safeMessage(e));
                 });
     }
 
     private void setLoading(boolean loading) {
+        if (!isActivityAlive() || progressFoodStatus == null) return;
         progressFoodStatus.setVisibility(loading ? View.VISIBLE : View.GONE);
     }
 
@@ -106,6 +118,11 @@ public class FoodStatusActivity extends AppCompatActivity {
     }
 
     private void toast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        if (!isActivityAlive()) return;
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isActivityAlive() {
+        return !destroyed && !isFinishing() && !isDestroyed();
     }
 }

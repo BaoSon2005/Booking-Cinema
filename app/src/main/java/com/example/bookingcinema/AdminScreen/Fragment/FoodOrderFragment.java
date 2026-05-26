@@ -41,6 +41,7 @@ public class FoodOrderFragment extends Fragment {
     private MaterialButton btnUrgentFilter;
     private boolean showUrgentOnly = false;
     private final List<FoodOrder> allOrders = new ArrayList<>();
+    private boolean viewDestroyed = true;
 
     @Nullable
     @Override
@@ -51,6 +52,7 @@ public class FoodOrderFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        viewDestroyed = false;
         db = FirebaseFirestore.getInstance();
         progressOrders = view.findViewById(R.id.progressOrders);
         tvEmptyOrders = view.findViewById(R.id.tvEmptyOrders);
@@ -75,8 +77,10 @@ public class FoodOrderFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        viewDestroyed = true; // FIX: Không cho listener cập nhật RecyclerView sau khi view bị hủy.
         if (ordersRegistration != null) {
             ordersRegistration.remove();
+            ordersRegistration = null;
         }
         super.onDestroyView();
     }
@@ -86,6 +90,7 @@ public class FoodOrderFragment extends Fragment {
             setLoading(true);
             ordersRegistration = db.collection("Orders")
                     .addSnapshotListener((snapshot, error) -> {
+                        if (!isViewAlive()) return; // FIX: Callback Firestore có thể về sau onDestroyView().
                         setLoading(false);
                         allOrders.clear();
                         if (error != null) {
@@ -110,6 +115,7 @@ public class FoodOrderFragment extends Fragment {
     }
 
     private void publishFilteredOrders() {
+        if (!isViewAlive() || adapter == null || tvEmptyOrders == null) return;
         List<FoodOrder> filtered = new ArrayList<>();
         for (FoodOrder order : allOrders) {
             if (!showUrgentOnly || order.isUrgent()) {
@@ -133,6 +139,9 @@ public class FoodOrderFragment extends Fragment {
                 if (position == RecyclerView.NO_POSITION) {
                     return;
                 }
+                if (position < 0 || position >= adapter.getItemCount()) {
+                    return; // FIX: Tránh IndexOutOfBounds khi dữ liệu realtime đổi đúng lúc đang vuốt.
+                }
                 FoodOrder order = adapter.getOrder(position);
                 completeOrder(order, position);
             }
@@ -155,20 +164,26 @@ public class FoodOrderFragment extends Fragment {
         db.collection("Orders")
                 .document(order.getId())
                 .update(update)
-                .addOnSuccessListener(unused -> toast("Đã hoàn thành đơn " + order.getOrderCode()))
+                .addOnSuccessListener(unused -> {
+                    if (!isViewAlive()) return;
+                    toast("Đã hoàn thành đơn " + order.getOrderCode());
+                })
                 .addOnFailureListener(e -> {
+                    if (!isViewAlive()) return;
                     adapter.notifyItemChanged(position);
                     toast("Không thể hoàn thành đơn: " + safeMessage(e));
                 });
     }
 
     private void updateFilterButton() {
+        if (!isViewAlive() || btnUrgentFilter == null) return;
         btnUrgentFilter.setText(showUrgentOnly ? "Đang lọc khẩn cấp" : "Tất cả đơn");
         btnUrgentFilter.setTextColor(showUrgentOnly ? 0xFFFFFFFF : 0xFFE5BF2D);
         btnUrgentFilter.setBackgroundTintList(android.content.res.ColorStateList.valueOf(showUrgentOnly ? 0xFFFF0033 : 0xFF0D0D0D));
     }
 
     private void setLoading(boolean loading) {
+        if (!isViewAlive() || progressOrders == null) return;
         progressOrders.setVisibility(loading ? View.VISIBLE : View.GONE);
     }
 
@@ -177,6 +192,11 @@ public class FoodOrderFragment extends Fragment {
     }
 
     private void toast(String message) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        if (!isViewAlive()) return;
+        Toast.makeText(requireContext().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isViewAlive() {
+        return !viewDestroyed && isAdded() && getView() != null;
     }
 }

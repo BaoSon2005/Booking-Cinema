@@ -33,6 +33,7 @@ public class DashboardFragment extends Fragment {
     private AlertAdapter alertAdapter;
     private FirebaseFirestore db;
     private ListenerRegistration revenueRegistration, ticketsRegistration, ordersRegistration, seatsRegistration, alertsRegistration;
+    private boolean viewDestroyed = true;
 
     @Nullable
     @Override
@@ -43,6 +44,7 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        viewDestroyed = false;
         db = FirebaseFirestore.getInstance();
         tvRevenueToday = view.findViewById(R.id.tvRevenueToday);
         tvTicketsSold = view.findViewById(R.id.tvTicketsSold);
@@ -57,6 +59,7 @@ public class DashboardFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        viewDestroyed = true; // FIX: Chặn callback Firestore cập nhật view sau khi Fragment bị tháo.
         removeListeners();
         super.onDestroyView();
     }
@@ -80,6 +83,7 @@ public class DashboardFragment extends Fragment {
                 .whereGreaterThanOrEqualTo("createdAtMillis", start)
                 .whereLessThan("createdAtMillis", end)
                 .addSnapshotListener((snapshot, error) -> {
+                    if (!isViewAlive()) return; // FIX: Tránh UI leak khi callback về trễ.
                     if (error != null || snapshot == null) {
                         tvRevenueToday.setText(formatVnd(0));
                         return;
@@ -96,6 +100,7 @@ public class DashboardFragment extends Fragment {
     private void listenTicketsSold() {
         ticketsRegistration = db.collection("Tickets")
                 .addSnapshotListener((snapshot, error) -> {
+                    if (!isViewAlive()) return;
                     if (error != null || snapshot == null) {
                         listenHoaDonTicketFallback();
                         return;
@@ -106,13 +111,20 @@ public class DashboardFragment extends Fragment {
 
     private void listenHoaDonTicketFallback() {
         db.collection("HoaDon").get()
-                .addOnSuccessListener(snapshot -> tvTicketsSold.setText("Vé đã bán\n" + snapshot.size()))
-                .addOnFailureListener(e -> tvTicketsSold.setText("Vé đã bán\n0"));
+                .addOnSuccessListener(snapshot -> {
+                    if (!isViewAlive()) return;
+                    tvTicketsSold.setText("Vé đã bán\n" + snapshot.size());
+                })
+                .addOnFailureListener(e -> {
+                    if (!isViewAlive()) return;
+                    tvTicketsSold.setText("Vé đã bán\n0");
+                });
     }
 
     private void listenFoodOrders() {
         ordersRegistration = db.collection("Orders")
                 .addSnapshotListener((snapshot, error) -> {
+                    if (!isViewAlive()) return;
                     if (error != null || snapshot == null) {
                         tvComboCount.setText("Combo F&B\n0");
                         return;
@@ -129,6 +141,7 @@ public class DashboardFragment extends Fragment {
     private void listenOccupancyRate() {
         seatsRegistration = db.collection("seats")
                 .addSnapshotListener((snapshot, error) -> {
+                    if (!isViewAlive()) return;
                     if (error != null || snapshot == null || snapshot.isEmpty()) {
                         tvOccupancyRate.setText("Tỷ lệ lấp đầy\n0%");
                         return;
@@ -153,6 +166,7 @@ public class DashboardFragment extends Fragment {
     private void listenAlerts() {
         alertsRegistration = db.collection("Alerts")
                 .addSnapshotListener((snapshot, error) -> {
+                    if (!isViewAlive()) return;
                     alerts.clear();
                     if (error == null && snapshot != null) {
                         for (DocumentSnapshot doc : snapshot.getDocuments()) {
@@ -189,6 +203,11 @@ public class DashboardFragment extends Fragment {
         if (ordersRegistration != null) ordersRegistration.remove();
         if (seatsRegistration != null) seatsRegistration.remove();
         if (alertsRegistration != null) alertsRegistration.remove();
+        revenueRegistration = null;
+        ticketsRegistration = null;
+        ordersRegistration = null;
+        seatsRegistration = null;
+        alertsRegistration = null;
     }
 
     private long startOfTodayMillis() {
@@ -221,6 +240,11 @@ public class DashboardFragment extends Fragment {
     }
 
     private void toast(String message) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        if (!isViewAlive()) return;
+        Toast.makeText(requireContext().getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isViewAlive() {
+        return !viewDestroyed && isAdded() && getView() != null;
     }
 }

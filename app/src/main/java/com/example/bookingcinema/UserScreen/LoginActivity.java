@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String DEFAULT_USER_ROLE = "user";
+
     private EditText edtEmail, edtPassword, edtPhone, edtOtp;
     private Button btnLogin, btnGoogle, btnPhoneLogin, btnVerifyPhone, btnBiometric;
     private ProgressBar progressAuth;
@@ -45,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private String verificationId;
+    private boolean destroyed = false;
+    private boolean navigationStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,14 +56,20 @@ public class LoginActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        if (auth.getCurrentUser() != null) {
-            checkRoleAndRoute(auth.getCurrentUser());
-            return;
-        }
-
         setContentView(R.layout.activity_login);
         bindViews();
         setupListeners();
+
+        if (auth.getCurrentUser() != null) {
+            setLoading(true);
+            checkRoleAndRoute(auth.getCurrentUser()); // FIX: Vẫn có layout để hiển thị loading, tránh màn hình trắng.
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        destroyed = true; // FIX: Ngăn callback Auth/Firestore cập nhật UI sau khi Activity đóng.
+        super.onDestroy();
     }
 
     private void bindViews() {
@@ -96,8 +106,12 @@ public class LoginActivity extends AppCompatActivity {
         }
         setLoading(true);
         auth.signInWithEmailAndPassword(email, password)
-                .addOnSuccessListener(result -> handleAuthSuccess(result.getUser(), "email"))
+                .addOnSuccessListener(result -> {
+                    if (!isActivityAlive()) return;
+                    handleAuthSuccess(result.getUser(), "email");
+                })
                 .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
                     setLoading(false);
                     toast("Đăng nhập thất bại: " + safeMessage(e));
                 });
@@ -116,8 +130,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleAuthTask(Task<AuthResult> task, String provider) {
-        task.addOnSuccessListener(result -> handleAuthSuccess(result.getUser(), provider))
+        task.addOnSuccessListener(result -> {
+                    if (!isActivityAlive()) return;
+                    handleAuthSuccess(result.getUser(), provider);
+                })
                 .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
                     setLoading(false);
                     toast("Không thể đăng nhập: " + safeMessage(e));
                 });
@@ -137,17 +155,20 @@ public class LoginActivity extends AppCompatActivity {
                 .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                     @Override
                     public void onVerificationCompleted(@NonNull PhoneAuthCredential credential) {
+                        if (!isActivityAlive()) return;
                         signInWithPhoneCredential(credential);
                     }
 
                     @Override
                     public void onVerificationFailed(@NonNull FirebaseException e) {
+                        if (!isActivityAlive()) return;
                         setLoading(false);
                         toast("Không gửi được OTP: " + safeMessage(e));
                     }
 
                     @Override
                     public void onCodeSent(@NonNull String id, @NonNull PhoneAuthProvider.ForceResendingToken token) {
+                        if (!isActivityAlive()) return;
                         verificationId = id;
                         setLoading(false);
                         toast("Đã gửi OTP. Vui lòng kiểm tra tin nhắn");
@@ -173,8 +194,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private void signInWithPhoneCredential(PhoneAuthCredential credential) {
         auth.signInWithCredential(credential)
-                .addOnSuccessListener(result -> handleAuthSuccess(result.getUser(), "phone"))
+                .addOnSuccessListener(result -> {
+                    if (!isActivityAlive()) return;
+                    handleAuthSuccess(result.getUser(), "phone");
+                })
                 .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
                     setLoading(false);
                     toast("Xác minh OTP thất bại: " + safeMessage(e));
                 });
@@ -196,6 +221,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
+                if (!isActivityAlive()) return;
                 checkRoleAndRoute(auth.getCurrentUser());
             }
         });
@@ -208,6 +234,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleAuthSuccess(FirebaseUser user, String provider) {
+        if (user == null) {
+            setLoading(false);
+            toast("Không tìm thấy phiên đăng nhập");
+            return;
+        }
         syncUserProfile(user, provider);
         checkRoleAndRoute(user);
     }
@@ -220,23 +251,39 @@ public class LoginActivity extends AppCompatActivity {
         }
         db.collection("Users").document(user.getUid()).get()
                 .addOnSuccessListener(snapshot -> {
+                    if (!isActivityAlive()) return;
+                    if (snapshot == null || !snapshot.exists()) {
+                        readFallbackRole(user.getUid());
+                        return;
+                    }
                     String role = snapshot.getString("role");
                     if (role == null || role.trim().isEmpty()) {
                         readFallbackRole(user.getUid());
-                    } else {
-                        routeByRole(role);
+                        return;
                     }
+                    routeByRole(role);
                 })
-                .addOnFailureListener(e -> readFallbackRole(user.getUid()));
+                .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
+                    readFallbackRole(user.getUid());
+                });
     }
 
     private void readFallbackRole(String uid) {
         db.collection("users").document(uid).get()
-                .addOnSuccessListener(snapshot -> routeByRole(snapshot.getString("role")))
-                .addOnFailureListener(e -> rejectUnauthorized());
+                .addOnSuccessListener(snapshot -> {
+                    if (!isActivityAlive()) return;
+                    String role = snapshot != null && snapshot.exists() ? snapshot.getString("role") : DEFAULT_USER_ROLE;
+                    routeByRole(role == null || role.trim().isEmpty() ? DEFAULT_USER_ROLE : role);
+                })
+                .addOnFailureListener(e -> {
+                    if (!isActivityAlive()) return;
+                    routeByRole(DEFAULT_USER_ROLE); // FIX: Mất mạng không làm kẹt Login, tài khoản thường vào luồng User.
+                });
     }
 
     private void routeByRole(String role) {
+        if (!isActivityAlive() || navigationStarted) return;
         setLoading(false);
         if ("admin".equalsIgnoreCase(role)) {
             toast("Đăng nhập quản trị thành công");
@@ -250,6 +297,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void rejectUnauthorized() {
+        if (!isActivityAlive()) return;
         auth.signOut();
         setLoading(false);
         toast("Tài khoản chưa được phân quyền trong hệ thống CINE-LUXE");
@@ -279,8 +327,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void openScreen(Class<?> target) {
+        if (!isActivityAlive() || navigationStarted) return; // FIX: Chống nhiều callback mở chồng Activity.
+        navigationStarted = true;
         Intent intent = new Intent(this, target);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // FIX: Dọn back stack Login/Splash.
         startActivity(intent);
         finish();
     }
@@ -295,6 +345,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void toast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        if (!isActivityAlive()) return;
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean isActivityAlive() {
+        return !destroyed && !isFinishing() && !isDestroyed();
     }
 }
