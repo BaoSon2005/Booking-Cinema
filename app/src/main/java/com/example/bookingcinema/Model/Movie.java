@@ -18,6 +18,8 @@ public class Movie implements Serializable {
     private double rating;
     private int imageResId;
     private int basePrice;
+    private boolean deXuat;
+    private boolean isRecommended;
 
     public Movie() {
         imageResId = 0;
@@ -68,4 +70,8 @@ public class Movie implements Serializable {
     public void setImageResId(int imageResId) { this.imageResId = imageResId; }
     public int getBasePrice() { return basePrice <= 0 ? 90000 : basePrice; }
     public void setBasePrice(int basePrice) { this.basePrice = basePrice; }
+    public boolean isDeXuat() { return deXuat; }
+    public void setDeXuat(boolean deXuat) { this.deXuat = deXuat; }
+    public boolean isRecommended() { return isRecommended; }
+    public void setRecommended(boolean recommended) { isRecommended = recommended; }
 }
